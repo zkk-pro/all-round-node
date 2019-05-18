@@ -11,3 +11,5 @@ Node是创建高可拓展性(Highly-scalable)、数据密集型(data-intensive)�
 - 使用的JavaScript语言，可复用你的知识
 - 前后端使用JavaScript，代码将更简洁明了，可以使用相同的命名规范、工具、和最贱实践
 - 拥有强大的生态和众多开源库
+
+## Node 的安装

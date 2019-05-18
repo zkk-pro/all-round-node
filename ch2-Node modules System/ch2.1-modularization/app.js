@@ -19,3 +19,12 @@ Module: {
     ]
 }
 */
+
+// 加载模块
+const message = require('./message')
+// require 返回的就是 module 里的 exports对象
+console.log(message) // { todo: [Function: todo], myName: 'hey' }
+// 然后我们就可以直接使用
+message.todo('hello, node.js') // hello, node.js
+
+

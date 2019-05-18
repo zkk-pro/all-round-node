@@ -2,8 +2,8 @@
 
 let name = 'hey'
 
-function todo() {
-    console.log('todo')
+function todo(msg) {
+    console.log(msg)
 }
 
 module.exports.todo = todo
