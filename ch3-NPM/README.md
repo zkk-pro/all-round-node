@@ -61,5 +61,7 @@ npm i underscore // i 是 install 的缩写
 }
 ```
 在这个 package.json 文件中标识了每个依赖库的名字和版本（版本中的冥符号`^`后面会说到）。
-当我们允许了`npm i underscore`，npm 会从注册库(https://www.npmjs.com)中下载给定名称的库的最新版，它会保存在一个叫`node_modules`的文件夹中，
-
+当我们允许了`npm i underscore`，npm 会从注册库(https://www.npmjs.com)中下载给定名称的库的最新版，它会保存在一个叫`node_modules`的文件夹中：
+![node dir](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_dir.png?raw=true)
+我们会发现在 underccore 这个模块下面又有一个 package.json 文件，每一个模块都有自己的 package.json。
+> 自以前的 npm 版本中，使用 `npm i underscore --save` 这种命令，如果没有`--save`这个参数，npm 的package.json 中的依赖（dependencies）就不会添加 underscore 库的信息，这个行为特征在新版的 npm 中改变了，所以不用刻意的添加`--sava`这个参数了。
