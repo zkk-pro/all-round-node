@@ -67,3 +67,25 @@ npm i underscore // i 是 install 的缩写
 
 我们会发现在 underccore 这个模块下面又有一个 package.json 文件，每一个模块都有自己的 package.json。
 > 自以前的 npm 版本中，使用 `npm i underscore --save` 这种命令，如果没有`--save`这个参数，npm 的package.json 中的依赖（dependencies）就不会添加 underscore 库的信息，这个行为特征在新版的 npm 中改变了，所以不用刻意的添加`--sava`这个参数了。
+
+### 使用一个包
+```javascript
+// 引入模块
+const _ = require('underscore)
+```
+
+**require 函数加载模块的过程**
+
+1. 首先 require 函数会认为你需要一个Core module（核心模块），在 node 中没有一个叫 underscore 的核心模块
+2. 然后 require 函数就会认为，也许有叫这个名字的文件或者文件夹，但是，我们在之前说过，当你要引用文件的文件时，需要使用相对路劲，例如`require(./underscore)`。如果使用了路径方式作为参数传递给 require 方法，那么就会认为在当前目录下有一个`underscore.js`的文件，如果不是，它还会认为在当前目录下有一个叫`underscore`的`文件夹`，该文件夹下有一个`index.js`的文件
+3. 如果上面都不是，require 函数会假设第三种可能，它会认为在`node_modules`文件夹中有一个叫`underscore`的库，找到了之后，会读取这个库的 package.json 文件，并找到`main`字段，这个字段是库的入口文件，然后开始加载这个文件。
+
+> 总结来说：首先假设参数名时一个核心模块，否者它就假设参数名是一个文件或者文件夹，如果不是，他就会在 node_module 文件夹里寻找
+**使用库**
+```javascript
+const _ = require('underscore)
+
+// 使用 underscore：查找数组里是否包含某个数
+let bool = _.contains([1,2,3,4], 3)
+console.log(bool) // true
+```
