@@ -63,7 +63,7 @@ npm i underscore // i 是 install 的缩写
 在这个 package.json 文件中标识了每个依赖库的名字和版本（版本中的冥符号`^`后面会说到）。
 当我们允许了`npm i underscore`，npm 会从注册库(https://www.npmjs.com) 中下载给定名称的库的最新版，它会保存在一个叫`node_modules`的文件夹中：
 
-![node dir](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_dir.png?raw=true)
+![node dir](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_dir.png?raw=true =100x200)
 
 我们会发现在 underccore 这个模块下面又有一个 package.json 文件，每一个模块都有自己的 package.json。
 > 自以前的 npm 版本中，使用 `npm i underscore --save` 这种命令，如果没有`--save`这个参数，npm 的package.json 中的依赖（dependencies）就不会添加 underscore 库的信息，这个行为特征在新版的 npm 中改变了，所以不用刻意的添加`--sava`这个参数了。
@@ -89,3 +89,69 @@ const _ = require('underscore)
 let bool = _.contains([1,2,3,4], 3)
 console.log(bool) // true
 ```
+
+### 包说明
+
+**引子**
+
+通过之前的讲解，我们已经学会如何安装一个包，So，现在请你自己安装一个包`mongoose`
+
+```javascript
+npm i mongose
+```
+
+
+
+安装完成后，在`package.json`中的依赖(dependencies)中你会看到多了一个`"mongoose": "^5.5.10"`:
+
+![install_mongoose](https://github.com/zkk-pro/all-round-node/blob/master/assets/install_mongoose.png?raw=true =100x200)
+
+再看一下 `node_modules` 文件夹：
+
+![node_modules_dir](https://github.com/zkk-pro/all-round-node/blob/master/assets/node_modules_dir.png?raw=true =100x200)
+
+**Q**
+
+你会看到多了很多目录，我们不是只安装了`underscore`和`mongoose`两个模块包吗，怎么会这么多⁉️
+
+**A**
+
+这里面其他的库，是其他的 node 模块包，并且是`mongoose`模块依赖的库，在以前的 npm 中，并不是这个样子的，所有的第三方依赖的库，都是安装在库自身的 node_modules 文件夹下，这样 node 模块和它的依赖是高度耦合的，但是这样就出现了一个问题，一个依赖库可能被多次安装，如果模块的依赖很多，就会得到一个嵌套非常深的文件结构，特别是在 windows 平台，是限制了文件夹嵌套层的数量的。但是，现在 npm 的实现跟以前的不一样了，所有应用的依赖和模块的依赖，都保存在一个`node_modules`文件夹里。但是也有例外，比如两个模块依赖同样的库，但是依赖的版本不一样，这种情况，它们的依赖将各自保存在自身文件夹中。
+
+### 语义化版本控制(SemVer)
+
+在之前，我们提到过冥符号（`^`）。先来了解一下什么是语义化版本控制，在node 包的版本号有 3 个部分(以`.`分割)数字组成，例如我们安装的`mongoose`，版本号是：`^5.5.10`：
+- 第一个数字：主要版本号，破坏了现有 api 或更改了依赖
+- 第二个数字：次要版本号，主要增加新特性，不会破坏现有 api
+- 第三个数字：补丁号或补丁更新（表示修复 bug）
+这就是语义化版本控制，那么现在可能会注意到冥符号（`^`），这个符号是告诉 npm 你关心 mongoose 的任何版本更新，只要主版本是`5`，简单说就是，每次安装该包是，都会安装该包主版本中的最新版本。
+
+还有一种符号是`~`，例如`"mongoose": "~5.5.10"`，这又是什么意思呢？这个符号表示的意思是：固定主版本是`5`，次版本是`5`，简单说就是，每次安装该包，只会安装该包固定的主要版本和次要版本的最新 bug 版。
+
+最后，如果前面什么符号都不加，例如`"mongoose": "5.5.10"`，这样的情况下，每次重新安装依赖，都会安装这个版本，也就表示固定版本。
+
+### 列出已安装的包
+
+有时候，有可能 node_modules 安装的包的版本高于或低于`package.json`文件里显示的版本，那么如何查看已安装的库是什么版本呢？
+1. 在 node_modules 下找到该包，查看该包的 package.josn 文件里的`version`属性，如果想要知道多个包的版本，这种方式显然有点“累”，请看第2中方式
+2. 使用`npm list`命令，会出现一个`tree（树型依赖）`，这个“树”表示包的依赖和包依赖的依赖，这个tree显示了所有的依赖，看起来有点乱，如果只想看当前项目的直接依赖，可以使用`npm list --depth=0`
+
+### 查看一个包的信息
+查看一个包的信息可以直接在 npm 官网上搜索到该包后查看，也可在终端中使用npm 命令查看：`npm view mogoose`，使用该命令查看到的就是该包的`package.json`文件：
+
+![npm_view_mogoose](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_view_mogoose.png?raw=true =100x200)
+
+有时候，只想查看该包的莫个信息，可以运行：`npm view mongoose dependencies`（只查看该包的依赖信息）
+
+![npm_mongoose_dependencies](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_mongoose_dependencies.png?raw=true =100x200)
+
+查看包的版本，可以运行：`npm view mongoose version`
+
+![npm_view_mongoose_version](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_view_mongoose_version.png?raw=true =100x200)
+
+查看包的所有版本，可以运行：`npm view mongoose versions`（多了个`s`）
+
+![npm_view_mongoose_versions](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_view_mongoose_versions.png?raw=true =100x200)
+
+
+### 安装特定的包
