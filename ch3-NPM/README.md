@@ -63,7 +63,7 @@ npm i underscore // i 是 install 的缩写
 在这个 package.json 文件中标识了每个依赖库的名字和版本（版本中的冥符号`^`后面会说到）。
 当我们允许了`npm i underscore`，npm 会从注册库(https://www.npmjs.com) 中下载给定名称的库的最新版，它会保存在一个叫`node_modules`的文件夹中：
 
-![node dir](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_dir.png?raw=true =100x200)
+![node dir](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_dir.png?raw=true)
 
 我们会发现在 underccore 这个模块下面又有一个 package.json 文件，每一个模块都有自己的 package.json。
 > 自以前的 npm 版本中，使用 `npm i underscore --save` 这种命令，如果没有`--save`这个参数，npm 的package.json 中的依赖（dependencies）就不会添加 underscore 库的信息，这个行为特征在新版的 npm 中改变了，所以不用刻意的添加`--sava`这个参数了。
@@ -104,11 +104,11 @@ npm i mongose
 
 安装完成后，在`package.json`中的依赖(dependencies)中你会看到多了一个`"mongoose": "^5.5.10"`:
 
-![install_mongoose](https://github.com/zkk-pro/all-round-node/blob/master/assets/install_mongoose.png?raw=true =100x200)
+![install_mongoose](https://github.com/zkk-pro/all-round-node/blob/master/assets/install_mongoose.png?raw=true)
 
 再看一下 `node_modules` 文件夹：
 
-![node_modules_dir](https://github.com/zkk-pro/all-round-node/blob/master/assets/node_modules_dir.png?raw=true =100x200)
+![node_modules_dir](https://github.com/zkk-pro/all-round-node/blob/master/assets/node_modules_dir.png?raw=true)
 
 **Q**
 
@@ -139,19 +139,19 @@ npm i mongose
 ### 查看一个包的信息
 查看一个包的信息可以直接在 npm 官网上搜索到该包后查看，也可在终端中使用npm 命令查看：`npm view mogoose`，使用该命令查看到的就是该包的`package.json`文件：
 
-![npm_view_mogoose](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_view_mogoose.png?raw=true =100x200)
+![npm_view_mogoose](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_view_mogoose.png?raw=true)
 
 有时候，只想查看该包的莫个信息，可以运行：`npm view mongoose dependencies`（只查看该包的依赖信息）
 
-![npm_mongoose_dependencies](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_mongoose_dependencies.png?raw=true =100x200)
+![npm_mongoose_dependencies](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_mongoose_dependencies.png?raw=true)
 
 查看包的版本，可以运行：`npm view mongoose version`
 
-![npm_view_mongoose_version](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_view_mongoose_version.png?raw=true =100x200)
+![npm_view_mongoose_version](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_view_mongoose_version.png?raw=true)
 
 查看包的所有版本，可以运行：`npm view mongoose versions`（多了个`s`）
 
-![npm_view_mongoose_versions](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_view_mongoose_versions.png?raw=true =100x200)
+![npm_view_mongoose_versions](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_view_mongoose_versions.png?raw=true)
 
 
 ### 安装特定的包
