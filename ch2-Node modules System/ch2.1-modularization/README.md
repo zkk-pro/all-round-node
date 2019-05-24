@@ -50,12 +50,16 @@ Module: {
 
 ### 模块的创建导出和加载
 首先我们需要创建2个文件，一个`app.js`为主模块，一个`message.js`被引用模块：
+
 ```javascript
 |- app.js
 |- message.js
 ```
-**创建和导出模块**
+
+**1、创建和导出模块**
+
 创建`message.js`模块，内容为：
+
 ```javascript
 // message.js
 let name = 'hey'
@@ -64,10 +68,11 @@ function todo() {
     console.log('todo')
 }
 ```
+
 要在`app.js`中访问`message.js`的变量或函数，需要先调用`message.js`模块，因为在模块中的成员外部是不可访问的，所以需要将要被访问的成员变为公有的，那么怎么做呢？
 
-在上面，我们打印出了module对象，里面有一个`exports`属
-性，所有添加到这个对象的属性将可以被外部访问，现在我们为`exports`对象添加一个`todo`方法，并赋值为所写的`todo`函数，到处变量也同样的方式：
+在上面，我们打印出了module对象，里面有一个`exports`属性，所有添加到这个对象的属性将可以被外部访问，现在我们为`exports`对象添加一个`todo`方法，并赋值为所写的`todo`函数，到处变量也同样的方式：
+
 ```javascript
 // message.js
 let name = 'hey'
@@ -78,9 +83,10 @@ function todo(msg) {
 module.exports.todo = todo
 module.exports.myName = name // 在导出的时候可以改名（一般不会这么做）
 ```
+
 > 在实际开发中，模块是实现一个或一组特定的功能，每个模块都有很多变量和函数，所以有一个原则，尽可能的公开最少限度成员，因为这样可以让模块保持简单易用。举个现实的例子：例如DVD播放器，DVD上只有几个按钮共我们使用，这些按钮相当于模块中公开的成员，但是DVD里面有很多复杂的元件，我们不需要了解它们是如何运作的，这些元件就是DVD实现播放的细节，相当于我们模块中实现功能的细节，其他模块不需要知道该模块的实现细节，它们只需要调用公开的函数即可。
 
-**加载模块**
+**2、加载模块**
 
 加载模块我们需要用到`require()`函数，这个函数是Node才有的，浏览器中没有，这个函数需要一个参数，就是我们想要加载的模块名称，在上面，`app.js`主模块和`meaasge.js`模块在同一级目录下，我们用`./`表示当前目录，加载`message.js`模块就是`require(./message.js)`，也可以简写为`require(./message)`，因为Node知道这是一个js文件，会自动添加拓展名。
 
@@ -94,7 +100,9 @@ console.log(message) // { todo: [Function: todo], myName: 'hey' }
 // 然后我们就可以直接使用
 message.todo('hello, Node.js') // hello, node.js
 ```
+
 如果是我们的模块只导出一个成员，那么我们没必要给`exports`对象添加属性，而是直接赋值一个变量或者函数：
+
 ```javascript
 // 导出
 function todo(msg) {
@@ -111,11 +119,15 @@ msg('Hello, Node.js') // hello, node.js
 这就是Node中模块的工作方式：定义一个模块，导出一个或多个成员，为了使用模块，我们需要使用`require`函数。作为最佳事件，导入的模块我们应该保存在在常量中(使用`const`定义的变量)，因为后面很有可能意外的将message变量重新赋值，如果重新赋值了，后面使用message的调用就会报错，但是我们定义常量的话，赋值就会报错，配合一些专门的检查工具，我们就能在编写时期检测到错误，从而避免出错。
 
 ## Node模块化的原理
+
 - 首先“做好”一个语法错误，故意让程序报错：
+
 ```javascript
 var x =; // 必须写在第一行，前面有空行都不行
 ```
+
 - 然后使用node运行该程序，得到报错：
+
 ```javascript
 (function (exports, require, module, __filename, __dirname) { var x =;
                                                                      ^
@@ -123,7 +135,9 @@ var x =; // 必须写在第一行，前面有空行都不行
 SyntaxError: Unexpected token ;
 ...
 ```
-得到一个函数的描述，这个函数有几个参数：exports、require、module、__filename和__dirname。Node并没有直接执行我们写在文件模块中的代码，这些代码被包含在一个`立即执行函数(IIFE)`中，就是上面报错出现的函数，所以在运行时，我们写的代码就变成了这样：
+
+得到一个函数的描述，这个函数有几个参数：exports、require、module、\__filename和\__dirname。Node并没有直接执行我们写在文件模块中的代码，这些代码被包含在一个`立即执行函数(IIFE)`中，就是上面报错出现的函数，所以在运行时，我们写的代码就变成了这样：
+
 ```javascript
 (function(exports, require, module, __filename, __dirname) {
     var x =; // 必须写在第一行，前面有空行都不行
@@ -139,5 +153,5 @@ SyntaxError: Unexpected token ;
 
 **总结**
 
-现在我们对Node的模块运作方式和模块的导出、引入有了一定的了解，知道如何导出模块、引入模块。在Node中内置了很多有用和常用的模块，我们将在下一步继续学习他们。
+现在我们对Node的模块运作方式和模块的导出、引入有了一定的了解，知道如何导出模块、引入模块。在Node中内置了很多有用和常用的模块能够帮助我们更好的完成项目，node 的 API 我们不会涉及太多去讲解如何使用，官方文档已经有详细的解释每个大家可以去 node 官网查看，也有中文的文档：`http://nodejs.cn`。
 
