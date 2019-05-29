@@ -137,21 +137,54 @@ npm i mongose
 2. 使用`npm list`命令，会出现一个`tree（树型依赖）`，这个“树”表示包的依赖和包依赖的依赖，这个tree显示了所有的依赖，看起来有点乱，如果只想看当前项目的直接依赖，可以使用`npm list --depth=0`
 
 ### 查看一个包的信息
-查看一个包的信息可以直接在 npm 官网上搜索到该包后查看，也可在终端中使用npm 命令查看：`npm view mogoose`，使用该命令查看到的就是该包的`package.json`文件：
+
+【查看一个包的信息】，可以直接在 npm 官网上搜索到该包后查看，也可在终端中使用npm 命令查看：`npm view mongoose`，使用该命令查看到的就是该包的`package.json`文件：
 
 ![npm_view_mogoose](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_view_mogoose.png?raw=true)
 
-有时候，只想查看该包的莫个信息，可以运行：`npm view mongoose dependencies`（只查看该包的依赖信息）
+【查看该包的单个信息】，有时候，只想查看该包的单个信息，可以运行：`npm view mongoose dependencies`（只查看该包的依赖信息）
 
 ![npm_mongoose_dependencies](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_mongoose_dependencies.png?raw=true)
 
-查看包的版本，可以运行：`npm view mongoose version`
+【查看包的版本】，可以运行：`npm view mongoose version`
 
 ![npm_view_mongoose_version](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_view_mongoose_version.png?raw=true)
 
-查看包的所有版本，可以运行：`npm view mongoose versions`（多了个`s`）
+【查看包的所有版本】，可以运行：`npm view mongoose versions`（多了个`s`）
 
 ![npm_view_mongoose_versions](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_view_mongoose_versions.png?raw=true)
 
+### 包的操作
 
-### 安装特定的包
+【安装特定版本的包】，有时候我们需要安装特定版本的包而不是最新的包（npm install xxx默认安装最新版本的包），那么我们可以在包名后面加一个`@`和指定的版本号，安装指定版本命令，可以运行：`npm i mongoose@4.5.6`，运行该命令后，再次查看`package.json`文件，包和依赖已经更新成了我们指定的版本。
+
+![npm_i_mongoose@4.2.0](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_i_mongoose@4.5.6.jpg?raw=true)
+
+同样的，可以使用前面讲解的`npm list --depth=0`查看node_modules文件夹中mongoose的版本，也是`4.5.6`
+
+![npm_list_--depth=0](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_list_--depth=0.jpg?raw=true)
+
+> 练习：
+>> 尝试安装指定版本`1.5.0`版本的`underscore`
+
+【对比已安装包和仓库中的包】在现实开发中，可能会有已安装包升级的需要，如何快速了解已安装的包和已发布的包的版本呢？可以使用`npm outdated`：
+
+![npm_outdated](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_outdated.jpg?raw=true)
+
+使用该命令后，可以查看已安装版本及对比在npm仓库中新发布的版本（如果本地包是最新的，就不会列出来）：
+- Package：包名
+- Current：表示当前已安装的版本
+- Wanted：期待的版本，期待指的是：该包`主版本`中最新的版本
+- Latest：最新版本
+
+【升级包】可以使用命令`npm update`，但是该命令只会升级`次要版本`和`补丁版本`，因为如果升级了主要版本，很可能已经有核心部分更新了（前面讲过，主要版本的更新可能会破坏了现有 api 或更改依赖），这就会导致项目出错，运行命令：`npm update`：
+
+![npm_update](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_update.jpg?raw=true)
+
+我们看到，underscore 更新到了最新版，因为已安装版本的主版本和npm仓库中的主版本是一样，但是mongoose只更新到了主版本4中的最新版（也是上面对比中的`Wanted`期待版本），这并不是npm仓库中的最新版（当前npm仓库中最新版是`5.5.11`），主版本不一样，如果想更新到和仓库中一样的最新版本，`npm update`是做不到的，如果想更新，就需要另一个命令行工具`npm-check-updates`，运行`npm i -g npm-check-updates`全局安装，然后在命令行中运行：`npm-check-updates`或者`ncu`：
+
+![npm-check-updates](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm-check-updates.jpg?raw=true)
+
+运行后，会显示可升级的包当前版本和可升级的版本（npm仓库中最新版本），然后，可使用`ncu -u`来更新`package.json`文件（注意：只是更新package.json文件哦，还没有依赖），然后再运行`npm i`更新依赖，最后检测一下，运行`npm outdated`，发现没有任何输出结果，表明本地依赖都是最新的，同样的运行`npm-check-updates`(或`ncu`)，输出的提示是：所有依赖都是最新的。
+
+### 开发用依赖库
