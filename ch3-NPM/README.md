@@ -187,4 +187,72 @@ npm i mongose
 
 运行后，会显示可升级的包当前版本和可升级的版本（npm仓库中最新版本），然后，可使用`ncu -u`来更新`package.json`文件（注意：只是更新package.json文件哦，还没有依赖），然后再运行`npm i`更新依赖，最后检测一下，运行`npm outdated`，发现没有任何输出结果，表明本地依赖都是最新的，同样的运行`npm-check-updates`(或`ncu`)，输出的提示是：所有依赖都是最新的。
 
-### 开发用依赖库
+【删除包】删除包可以使用`npm uninstall packageName`（packageName表示包名），或者使用缩写`npm un pakageName`
+
+```javascript
+npm uninstall mongoose
+// 或
+npm un mongoose
+```
+然后查看`package.json`，mongoose 已经不再依赖中了，同时它也不再node_modules文件中了
+
+### 开发时的依赖库
+在现实开发中，有时候我们需要一些只在开发阶段才使用的库，例如进行单元测试时使用的工具、打包JavaScript代码的工具、静态代码分析工具等，这些事在开发时所依赖的，所以这些库在发布的时候不用一起发布，例如安装一个静态代码分析工具：
+
+```javascript
+npm i jshint --save-dev
+```
+在安装命令的时候，添加参数`--save-dev`或`-D`，然后我们再看`package.json`文件：
+
+![npm_i_jshint_-D](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_i_jshint_-D.jpg?raw=true)
+
+可以看到`jshint`被安装到了`devDependencies`属性下，在这个属性下，node就知道这是一个开发依赖，不用发布到生产环境
+
+### 操作全局包
+之前我们所安装的包，都是处于某个node工程文件中，但是，有的包不是针对某个应用的（通常是命令行工具），它们被安装在全局中，所谓全局，就是可以在任何文件目录下都可以访问的，比如我们使用的npm命令行工具、或者Vue的脚手架工具`vue-cli`，可以使用它创建一个Vue工程。如果要全局安装一个包，可以在安装包的时候添加一个参数`-g`，例如：
+
+```javascript
+npm i -g vue-cli
+```
+
+在之前，我们查看项目中已安装的包的版本和npm仓库中最新版本的包的对比，使用`npm outdated`，同样的，全局的包也可以查看对比，但是需要添加一个参数`-g`，命令为：`npm -g outdated`。可以看到全局包的版本对比npm仓库中的版本：
+
+![npm_-g_outdated](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_-g_outdated.jpg?raw=true)
+
+### 发布一个包
+我们可以创建一个包，然后发布到npm仓库中。
+1. 创建一个文件夹，名称是我们项目的名称，例如叫：`zkk-pro-lib`
+
+```javascript
+mkdir zkk-pro-lib
+```
+2. 进入创建的文件夹，并创建`package.json`文件
+
+```javascript
+cd zkk-pro-lib
+npm init -y
+```
+3. 使用代码编辑器打开`zkk-pro-lib`文件夹，创建一个文件`index.js`作为该包的入口，然后就可以编写代码了。
+
+![zkk-pro-lib](https://github.com/zkk-pro/all-round-node/blob/master/assets/zkk-pro-lib.jpg?raw=true)
+
+4. 登陆。如果没有npm的账户，需要创建一个账户，使用命令：`npm adduser`，然后按提示输入用户名、密码、邮箱，如果有账户，使用命令：`npm login`来登陆，同样的，也是按提示输入用户名、密码、邮箱即可登陆。
+
+5. 发布包，我们使用`npm publish`命令
+
+![npm_publish](https://github.com/zkk-pro/all-round-node/blob/master/assets/npm_publish.jpg?raw=true)
+
+> 新注册的npm账户注意要先验证邮箱，不然发布会报错发布了包哦，还要的错误可能是你发布的包的名称在npm仓库中已经存在，这种情况需要修改包的名称，在`package.json`文件中的`name`中。
+
+6. 包发布成功后，尝试安装一下我们自己发布的包吧，运行`npm i zkk-pro-lib`，成功安装后会发现，我们项目中的依赖添加了`zkk-pro-lib`，同时查看node_modules下`zkk-pro-lib`文件夹，正是我们创建的包，查看该包的`package.json`文件，发现该文件比我们之前发布时的信息更多，这是因为当发布包时，npm会创建它自己的`package.json`文件。最后就可以在项目中导入并使用这个包了。
+
+### 更新自己发布的包
+当我们想要更新包时，修改完代码后不能直接发布，如果直接发布，会报错说：不能发布与现有版本号重复的版本。根据前面所讲的`语义化版本控制`规则修改`package.json`中的`version`属性，现在我们增加一个功能，没有破坏原有的api，所以修改`次版本号`为`1.1.0`。可以手工修改，也可以借助npm命令修改：
+- npm version major: 更新主版本号
+- npm version minor: 更新次版本号
+- npm version patch: 更新补丁版本号
+
+然后再使用`npm publish`发布新版本
+
+## 总结：
+这就是通过npm安装、删除、发布、更新包的所有操作，熟练掌握这些操作，是作为现代前端必备的技能，如果有哪里不清楚的，欢迎与我交流`【WX/QQ：2804059161】`

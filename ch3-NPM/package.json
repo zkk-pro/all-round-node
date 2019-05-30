@@ -9,7 +9,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "mongoose": "^5.5.11",
-    "underscore": "^1.9.1"
+    "underscore": "^1.9.1",
+    "zkk-pro-lib": "^1.0.0"
+  },
+  "devDependencies": {
+    "jshint": "^2.10.2"
   }
 }
