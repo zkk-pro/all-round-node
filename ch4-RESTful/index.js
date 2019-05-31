@@ -1,7 +1,6 @@
 const express = require('express') // 引入express，返回一个函数
 
 const app = express() // 执行函数，返回一个Express对象
-
 /**
  * express方法返回的对象有很多方法，例如：
  * app.get()
@@ -15,5 +14,5 @@ const app = express() // 执行函数，返回一个Express对象
 app.get('/', (req, res) => {
   res.send('Hello, express!!!')
 })
-
-app.listen(3000, () => {console.log('app runing port 3000')})
+const port = process.env.PORT || 3000
+app.listen(port, () => {console.log(`app runing port ${port}`)})

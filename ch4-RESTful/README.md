@@ -45,4 +45,73 @@ app.listen(3000, () => {console.log('app runing port 3000')})
 npm i -g nodemon
 ```
 
-安装后，以后运行程序就是用`nodemon index.js`，启动后，nodemon会监测该文件夹所有文件、文件名、文件拓展名的改动，在代码修改保存后，nodemon会自动重启运行应用，这样每次修改就不用手工重启了
+安装后，以后运行程序就是用`nodemon index.js`，启动后，nodemon会监测该文件夹所有文件、文件名、文件拓展名的改动，在代码修改保存后，nodemon会自动重启运行应用，这样每次修改就不用手工重启了。
+
+## 环境变量
+上面我们写的web服务器监听的服务端口3000是写死的，在开发环境还行，但是在生产环境可能就不灵了，因为当我们把应用发布到一个共享平台时，应用可用的端口是由平台动态分配的，所以不能确定我们写的3000是否一定有用，优化这个问题的做法是使用`环境变量`，一般的，在环境变量中管理端口的属性是`PORT`，环境变量就是在进程运行时才产生的变量，它是在应用之外设置的变量，在node中，需要读取环境变量的PORT属性，so，为了读取PORT属性，我们需要使用`process对象`。`process`是node中的全局对象，该对象下有个属性是`env`，该属性可以获取系统设置的所有环境变量，所以我们可以使用`process.env.PORT`来指定应用的端口：
+
+```javascript
+// 如果系统指定了PORT，就用系统的指定的端口，如果没有就用3000端口
+const port = process.env.PORT || 3000
+// 所以上面的应用监听改为
+app.listen(port, () => {console.log(`app runing port ${port}`)})
+```
+
+### 设置环境变量
+- 在Mac中：
+```javascript
+export PORT=5000
+```
+- 在windows中：
+```javascript
+set PORT=5000
+```
+
+**小结**
+
+这就是node应用中正确设置端口的方法，需要先尝试读取环境变量的值，如果有，就用环境变量里的值，没有就用设置的端口。
+
+## Express 中的参数
+我们以电影为例，首先创建一个RESTful服务，获取所有电影列表（暂时不涉及数据库操作，数据保存在内存中，后面再讲数据库）：
+
+```javascript
+const express = require('express')
+
+const app = express()
+
+const port = process.env.PORT || 3000
+let videos = [
+  {id: 1, name: 'movie1'},
+  {id: 2, name: 'movie2'}
+]
+// 获取所有电影列表
+app.get('/api/videos', (req, res) => {
+  res.send(videos)
+})
+
+app.listen(port, () => { console.log(`Listening on port ${port}`) })
+```
+### 获取路由参数
+如果需要获取单个电影数据，就需要在url中包含电影的id，所以，如果想获取`id为1`的电影，url应该是这样的：`/api/videos/1`。1是电影的id，我们的应用中就应该这样写：
+
+```javascript
+// :id表示参数，id是参数名，也可以叫别的名字
+// 也可以指定多个参数，例如：/api/videos/:year/:month/:day
+app.get(`/api/videos/:id`, (req, res) => {
+  // req.params.id 获取路由参数（String类型）
+  // 从电影列表中查找到指定单个电影
+  let video = videos.find(video => {
+    return video.id === parseInt(req.params.id)
+  })
+  res.send(video) // 返回指定的单个电影数据
+})
+```
+
+### 获取查询字符串
+使用查询字符串向后端服务传递额外的参数，例如url为：`https//www.zkk-pro/api/videos/1?name=movie1`，表示获取id为1的电影数据，并且电影名字叫movie1的，我们用参数提供路由必要的值，使用查询字符串传递额外的内容，获取查询字符串的方法是：
+
+```javascript
+app.get(`/api/videos/:id`, (req, res) => {
+  res.send(req.query) // 获取查询字符串
+})
+```
