@@ -150,7 +150,7 @@ app.post('/api/videos', (req, res) => {
 
 `app.use(express.json())`看起来有点陌生，没关系，我们会在后面的`中间件章节`中讲解，当我们调用`express.json()`这个方法时，返回一个中间件，然后使用`app.use`方法在处理请求流程中使用这个中间件。编写完成后，我们可以在Chrome中添加`Postman`这个插件来请求我们的post接口：
 
-![post_postman](https://github.com/zkk-pro/all-round-node/blob/master/assets/post_postman.png?raw=true)
+![post_postman](https://github.com/zkk-pro/all-round-node/blob/master/assets/post_postman.jpg?raw=true)
 
 ### 数据验证
 从安全角度考虑，永远不要相信客户端发给你的东西，
