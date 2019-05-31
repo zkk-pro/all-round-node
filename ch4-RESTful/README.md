@@ -71,7 +71,12 @@ set PORT=5000
 
 这就是node应用中正确设置端口的方法，需要先尝试读取环境变量的值，如果有，就用环境变量里的值，没有就用设置的端口。
 
-## Express 中的参数
+## 在 Express 中处理请求
+
+这一小节我们讲解在Express中处理get、post、put、delete请求
+
+### 处理get请求和获取参数
+
 我们以电影为例，首先创建一个RESTful服务，获取所有电影列表（暂时不涉及数据库操作，数据保存在内存中，后面再讲数据库）：
 
 ```javascript
@@ -91,7 +96,8 @@ app.get('/api/videos', (req, res) => {
 
 app.listen(port, () => { console.log(`Listening on port ${port}`) })
 ```
-### 获取路由参数
+**获取路由参数**
+
 如果需要获取单个电影数据，就需要在url中包含电影的id，所以，如果想获取`id为1`的电影，url应该是这样的：`/api/videos/1`。1是电影的id，我们的应用中就应该这样写：
 
 ```javascript
@@ -100,14 +106,15 @@ app.listen(port, () => { console.log(`Listening on port ${port}`) })
 app.get(`/api/videos/:id`, (req, res) => {
   // req.params.id 获取路由参数（String类型）
   // 从电影列表中查找到指定单个电影
-  let video = videos.find(video => {
-    return video.id === parseInt(req.params.id)
-  })
+  let video = videos.find(v => v.id === parseInt(req.params.id))
+  // 没有找到，返回404，这是RESTful的惯例
+  if (!video) return res.status(404).send('no hava this video')
   res.send(video) // 返回指定的单个电影数据
 })
 ```
 
-### 获取查询字符串
+**获取查询字符串**
+
 使用查询字符串向后端服务传递额外的参数，例如url为：`https//www.zkk-pro/api/videos/1?name=movie1`，表示获取id为1的电影数据，并且电影名字叫movie1的，我们用参数提供路由必要的值，使用查询字符串传递额外的内容，获取查询字符串的方法是：
 
 ```javascript
@@ -115,3 +122,35 @@ app.get(`/api/videos/:id`, (req, res) => {
   res.send(req.query) // 获取查询字符串
 })
 ```
+
+### 处理post请求
+前面我们讲了处理HTTP的get请求，我们用get处理了获取所有数据和单一数据的请求，现在让我们来看看如何处理post请求，我们使用post请求来创建新数据。具体步骤如下：
+
+1. 首先需要读取request的请求体的数据，用请求体的数据创建一条数据；
+2. 然后添加到所有数据中。
+
+> 要读取请求体中的数据，需要打开Express获取请求体中JSON对象的功能（这个功能默认是关闭的）
+
+主要代码如下：
+
+```javascript
+app.use(express.json()) // 开启Express读取请求体功能
+
+// 处理post请求
+app.post('/api/videos', (req, res) => {
+  let video = {
+    id: videos.length + 1, // 因为没有用数据库，所以手工设置id
+    name: req.body.name
+  }
+  videos.push(video)
+  // 最后，按照惯例，我们应该返回新创建的数据，有可能客户端需要用到它
+  res.send(video)
+})
+```
+
+`app.use(express.json())`看起来有点陌生，没关系，我们会在后面的`中间件章节`中讲解，当我们调用`express.json()`这个方法时，返回一个中间件，然后使用`app.use`方法在处理请求流程中使用这个中间件。编写完成后，我们可以在Chrome中添加`Postman`这个插件来请求我们的post接口：
+
+![post_postman](https://github.com/zkk-pro/all-round-node/blob/master/assets/post_postman.png?raw=true)
+
+### 数据验证
+从安全角度考虑，永远不要相信客户端发给你的东西，
