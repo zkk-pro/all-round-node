@@ -1,7 +1,9 @@
+[TOC]
+
 # RESTful 服务
 
 ## 什么是 RESTful❓
-RESTful：状态表征转移（Representational State Transfer），也称为RESTful API，在现在web应用中，大多数都采用BS架构，应用的本身就是客户端端（前端部分），在底层它需要与服务器对话获取数据，这个对话是在HTTP协议下进行的，HTTP是用于支撑web技术的协议，服务器通过HTTP协议提供各种开放的功能服务，客户端通过发送HTTP请求来获取这些服务。本质上讲，REST就是用来创建这些规范的HTTP服务的，所以，我们使用简单的HTTP协议原则，提供数据的增(Create)查(Read)改(Update)删(delete)服务，我们把这些操作统称为`CRUD`操作。
+RESTful：状态表征转移（Representational State Transfer），也称为RESTful API，在现在web应用中，大多数都采用BS架构（Browser Server），应用的本身就是客户端（前端部分），在底层它需要与服务器对话获取数据，这个对话是在HTTP协议下进行的，HTTP是用于支撑web技术的协议，服务器通过HTTP协议提供各种开放的功能服务，客户端通过发送HTTP请求来获取这些服务。本质上讲，REST就是用来创建这些规范的HTTP服务的，所以，我们使用简单的HTTP协议原则，提供数据的增(Create)查(Read)改(Update)删(delete)服务，我们把这些操作统称为`CRUD`操作。
 服务的暴露出一个接口，如：`https:www.zkk-pro.com/api/videos`，客户端通过HTTP不同的方法(或叫动作)对应着要进行的操作，如：get表示获取数据；post添加/发布数据；put修改数据；delete表示删除数据。
 
 ## 使用 Express 创建HTTP服务
@@ -73,7 +75,7 @@ set PORT=5000
 
 ## 在 Express 中处理请求
 
-这一小节我们讲解在Express中处理get、post、put、delete请求
+这一小节我们讲解在Express中处理get、post、put、delete请求，我们可以使用`Postman`来测试我们创建的服务，`Postman`使用简单，可以自行在网上搜索。
 
 ### 处理get请求和获取参数
 
@@ -134,7 +136,7 @@ app.get(`/api/videos/:id`, (req, res) => {
 主要代码如下：
 
 ```javascript
-app.use(express.json()) // 开启Express读取请求体功能
+app.use(express.json()) // 开启Express读取请求体JSON数据功能
 
 // 处理post请求
 app.post('/api/videos', (req, res) => {
@@ -153,4 +155,125 @@ app.post('/api/videos', (req, res) => {
 ![post_postman](https://github.com/zkk-pro/all-round-node/blob/master/assets/post_postman.jpg?raw=true)
 
 ### 数据验证
-从安全角度考虑，永远不要相信客户端发给你的东西，
+从安全角度考虑，永远不要相信客户端发给你的东西，记住永远要验证输入的内容，所以上面的post请求，我们应该增加验证：
+
+```javascript
+// 验证输入
+// 处理post请求
+app.post('/api/videos', (req, res) => {
+  // 验证输入
+  if (!req.body.name || req.body.name.length < 3) {
+    // 返回：400 状态码，表示 Bad Request，是一个错误的请求
+    res.status(400).send('Name is required and should be minimum 3 characaters')
+    return
+  } 
+  let video = {
+    id: videos.length + 1, // 因为没有用数据库，所以手工设置id
+    name: req.body.name
+  }
+  videos.push(video)
+  // 最后，按照惯例，我们应该返回新创建的数据，有可能客户端需要用到它
+  res.send(video)
+})
+```
+
+在现实开发中，面对复杂的应用，很可能代码比这个复杂的多，如果你不想在最开始的时候就手写这么复杂输入验证逻辑，有一个可以轻松验证输入的包：`joi`，让我们看看如何使用`joi`：
+
+- 安装joi库
+
+```javascript
+npm i joi
+```
+- 使用joi库
+
+在使用Joi之前，要先定义一个schema(模式)，schema定义了对象外观的特征，比如对象中应该有什么属性，属性的类型是什么，最小和最大的字符数是多少，有没有包含数字，数字的范围是什么。。。等等，具体操作看下面代码：
+
+```javascript
+const Joi = require('joi') // 引入joi库
+// 处理post请求
+app.post('/api/videos', (req, res) => {
+  // 使用joi 验证输入
+  // 1. 定义一个schema
+  const schema = {
+    // 表示：有一个name属性，类型为字符串，最小长度为3，是必须的
+    name: Joi.string().min(3).required()
+  }
+  // 2.把请求数据和 schema 传递给validate方法中验证，返回一个对象
+  const result = Joi.validate(req.body, schema) 
+
+  // 查看结果，在发起post请求时，试试合法和不合法的参数，然后查看result是什么
+  // 如果合法，error 为null，不合法，error的值是具体的错误信息
+  console.log(result)
+  // { error: null,
+  //   value: { name: '123' },
+  //   then: [Function: then],
+  //   catch: [Function: catch] }
+
+  // 3.判断是否有合法(error不为null表示数据有误)，那么就返回400和错误信息
+  if (result.error) return res.status(400).send(result.error.details[0].message)
+
+  // 添加数据
+  let video = {
+    id: videos.length + 1, // 因为没有用数据库，所以手工设置id
+    name: req.body.name
+  }
+  videos.push(video)
+  // 最后，按照惯例，我们应该返回新创建的数据，有可能客户端需要用到它
+  res.send(video)
+})
+```
+
+**小结**
+对于客户端发过来的数据，一定要进行验证，使用`joi`库可以简单且直观的进行验证，`joi`还提供了很多其它验证功能，具体的可以在使用到的时候查看官方GitHub。
+
+### 处理put请求
+
+要对已有数据进行更改，应当使用`put请求`进行更新数据，下面让我们看看如何使用`put`请求更新数据：
+
+```javascript
+app.put('/api/videos/:id', (req, res) => {
+  // 1. 找到指定id的电影，如果存在，返回404
+  let video = videos.find(v => v.id === parseInt(req.params.id))
+  if (!video) return res.status(404).send('The video is not found')
+
+  // 2. 验证传递过来的电影对象(数据)，如果不合法，返回400
+  const schema = {
+    name: Joi.string().min(3).required()
+  }
+  const { error }= Joi.validate(req.body, schema)
+
+  if (error) return res.status(400).send(error.details[0].message)
+
+  // 3.更新电影数据，返回更新后的电影数据
+  video.name = req.body.name
+  res.send(video)
+})
+```
+
+### 处理delete请求
+
+到目前为止，我们实现了增、查和改操作，接下来我们看看删除操作，它跟之前的操作非常相似，具体代码如下：
+
+```javascript
+// 删除操作
+app.delete('/api/videos/:id', (req, res) => {
+  // 1. 根据参数 id 查找指定的电影，如果不存在返回404
+  let video = videos.find(v => v.id === parseInt(req.params.id))
+  if (!video) return res.status(404).send('The video is not found')
+
+  // 2.删除指定的电影
+  let index = videos.indexOf(video)
+  videos.splice(index, 1)
+
+  // 3. 返回删除的电影
+  res.send(video)
+})
+```
+
+## 总结
+
+在本章节中，我们主要讲解了什么是RESTful API，并且使用 Express 处理 CRUD 请求，后面我们还会涉及数据库的操作，会越来越全面哦！感谢阅读，希望本篇文章能让你收获知识O(∩_∩)O~~
+
+### 欢迎我的公众号
+
+![wx_qrcode](https://github.com/zkk-pro/all-round-node/blob/master/assets/wx_qrcode.jpg?raw=true)

@@ -255,4 +255,7 @@ npm init -y
 然后再使用`npm publish`发布新版本
 
 ## 总结：
-这就是通过npm安装、删除、发布、更新包的所有操作，熟练掌握这些操作，是作为现代前端必备的技能，如果有哪里不清楚的，欢迎与我交流`【WX/QQ：2804059161】`
+这就是通过npm安装、删除、发布、更新包的所有操作，熟练掌握这些操作，是作为现代前端必备的技能，欢迎与我交流`【WX/QQ：2804059161】`
+
+### 欢迎关注公众号
+![wx_qrcode](https://github.com/zkk-pro/all-round-node/blob/master/assets/wx_qrcode.jpg?raw=true)

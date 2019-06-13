@@ -16,13 +16,13 @@ Node是创建高可拓展性(Highly-scalable)、数据密集型(data-intensive)�
 4. 前后端使用JavaScript，代码将更简洁明了，可以使用相同的命名规范、工具、和最佳实践
 5. 拥有强大的生态和众多开源库
 
-## 📚本套文章的内容（目前进度：2.2章-node 常用的内建模块，持续更新中~~~）
+## 📚本套文章的内容（目前进度：第4章-RESTful API 服务，持续更新中~~~）
 - ch1：Node 简介和安装
 - ch2：Node 的模块系统
     + 2.1 Node 模块化
     + 2.2 Node 常用的内建模块
 - ch3：NPM的 介绍和使用
-- ch4：Restful
+- ch4：使用 Node 创建 RESTful API 服务
 - ch5：Midware 中间件
 - ch6：Async JS 异步编程
 - ch7：CURD 使用 MongoDB
