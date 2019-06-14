@@ -274,6 +274,6 @@ app.delete('/api/videos/:id', (req, res) => {
 
 在本章节中，我们主要讲解了什么是RESTful API，并且使用 Express 处理 CRUD 请求，后面我们还会涉及数据库的操作，会越来越全面哦！感谢阅读，希望本篇文章能让你收获知识O(∩_∩)O~~
 
-### 欢迎我的公众号
+### 欢迎关注我的公众号
 
 ![wx_qrcode](https://github.com/zkk-pro/all-round-node/blob/master/assets/wx_qrcode.jpg?raw=true)
