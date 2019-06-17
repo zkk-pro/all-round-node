@@ -1,7 +1,8 @@
 const express = require('express')
-const logger = require('./logger')
+const logger = require('./middleware/logger')
 const Helmet = require('helmet')
 const Morgan = require('morgan')
+const videos = require('./routes/videos')
 
 const app = express()
 
@@ -32,6 +33,8 @@ if (app.get('env') === 'development') {
   app.use(Morgan('tiny'))
   console.log('Morgan enabled...')
 }
+
+app.use('/', videos)
 
 app.get('/', (req, res) => {
   res.send('home')

@@ -178,5 +178,150 @@ console.log('Mail Password: ' + config.get('mail.password'))
 
 ## 调试
 
+在前端调试中，使用的最多的就是`console.log()`方式，但是这种方式，在调试完成后，我们就可能要删除或者注释掉它们，有时又要调试，我们又得回来改，这种操作非常的繁琐，更好的再控制台调试方式是使用node的debug模块，使用debug模块就是用debug函数来替换所有的打印命令，我们可以用一个环境变量来控制是否开启调试状态，这样我们就不用再代码中来回修改了，不需要删除或注释打印命令，可以通过外部修改环境变量实现，更重要的是，可以控制调试的层级，也许在你调试数据库时，只想看到数据库相关的调试信息，现在让我们看看如何使用debug模块进行调试。
 
+1. 安装debug包
 
+```javascript
+npm i debug
+```
+2. 使用debug包
+
+```javascript
+const express = require('express')
+// require('debug') 返回的是一个函数，我们可以调用这个函数，并给它传参
+// 传递的参数是一个用于调试的专用命名空间，例如这里传递：app:startup
+const startupDebugger= require('debug')('app:startup')
+// 再创建一个数据库的 debug
+const dbDebugger = require('debug')('app:db')
+
+const app = express()
+
+const PORT = process.env.PORT || 3000
+
+startupDebugger('app debug...')
+// 数据库调试。。。
+dbDebugger('db debug...')
+
+app.get('/', (req, res) => {
+  res.send('hello')
+})
+
+app.listen(PORT, () => console.log(`app running at ${PORT}`))
+```
+
+3. 启用调试
+
+当我们使用了debug模块后，通过设置环境变量来控制显示不同的debug。
+
+设置环境变量（Mac下）
+
+```javascript
+export DEBUG=app:startup
+```
+
+通过设置`DEBUG`环境变量为`app:startup`，这样的意思就是我们只能看到app:startup命名空间的调试信息，然后启动应用可以看到控制台只显示了app:startup的debug：
+
+![app_debug](https://github.com/zkk-pro/all-round-node/blob/master/assets/app_debug.png?raw=true)
+
+如果不想看到任何调试信息了，可以把DEBUG环境变量设置为空值：
+
+```javascript
+export DEBUG=
+```
+
+如果想看到多个调试信息，可以把DEBUG环境变量设置多个值，值与值之间使用`,`分割：
+
+```javascript
+export DEBUG=app:startup,app:db
+```
+
+可以看到多个调试打印出来：
+
+![more_debug](https://github.com/zkk-pro/all-round-node/blob/master/assets/more_debug.png?raw=true)
+
+如果需要查看所有调试信息时，可以把DEBUG环境变量设置为星号通配符：
+
+```javascript
+export DEBUG=app:*
+```
+
+还有一种设置命名空间的快捷方式，不需要专门使用export命令来设置环境变量，我们可以在启动应用的同时这是环境变量，例如我们想启动db的调试器：
+
+```javascript
+DEBUG=app:db node index.js
+```
+
+**小结**
+
+debug包给了我们非常多的功能来控制需要查看什么类型的信息，所以，以后尽量多使用debug包来替代console.log语句
+
+## 模板引擎
+
+到目前为止，我们编写的应用返回的都是JSON对象，有时候我们需要返回HTML到客户端，这是哈就需要用到模板引擎了，Express可以使用的模板引擎有很多，最有名的就是`Pug`、`Mustache`、`EJS`。每个引擎都有各自的语法来创建动态的HTML，本篇文章中，我们使用`Pug`来创建动态的HTML。
+
+1. 安装pug
+
+```javascript
+npm i pug
+```
+
+2. 在应用入口文件`index.js`设置应用的图形引擎：
+
+```javascript
+// 当我们这样设置后，Express会在内部自己导入pug包，而不要我们手工导入
+app.set('view engine', 'pug')
+// 模板的路径，不是必须的，默认是process.cwd()+'/views'，就是当前应用views文件夹
+app.set('views', './views') // 默认的
+```
+
+3. 在应用的跟目录下创建一个`views`文件夹，然后编写一个简单的模板：
+
+```pug
+html
+  head
+    title= title
+  body
+    h1= message
+```
+
+4. 在路由中返回这个模板，并设置动态的数据
+
+```javascript
+app.get('/', (req, res) => {
+  res.render('index', { title: 'My Express App', message: 'Hello Pug'})
+})
+```
+
+当我们启动应用访问时，pug会将模板转为HTML，并且title 和h1里的文字都是动态产生的。
+
+## 构建结构性的路由
+
+目前，我们所有的代码都是写在index.js文件里，在实际开发中，不会将所有东西都放在index.js文件中，现在来看看如何结构化应用。清晰明了，我们将不同功能的路由放在不同的文件里，例如之前有关videos的路由单独放在一个videos.js文件里，表示操作videos相关的逻辑：
+1. 首先在根目录创建一个`routes`文件夹，然后创建一个`videos.js`文件，将所有videos的操作路由都移动到这个文件
+2. 然后使用express的Router对象替换app对象，并导出这个router对象：
+
+```javascript
+const express = require('express')
+// 之前的操作如下，但是当我们把路由独立出来后，这样就没用了
+// 因为是创建了两个app对象
+// const app = express() 
+
+// 在express中，有一个Router方法，这个方法返回Router对象
+const router = express.Router()
+
+// 获取所有电影列表
+router.get('/api/videos', (req, res) => {
+  res.send(videos)
+})
+// more router...
+
+module.exports = router
+```
+
+### 总结
+本篇讲解了 Express 中间件、应用环境、应用配置、调试、以及结构化路由，这些都是在实际开发中会用到的知识，本篇知识粗略的讲解如何在应用中使用，更深入的知识还是的自己去查看官方文档探索，Thank for your reading!
+
+### 欢迎关注我的公众号
+
+![wx_qrcode](https://github.com/zkk-pro/all-round-node/blob/master/assets/wx_qrcode.jpg?raw=true)
