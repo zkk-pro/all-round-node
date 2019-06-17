@@ -29,7 +29,7 @@ sudo chown -R `id -un` /data/db
 
 在MongoDB官网（`https://www.mongodb.com`）中下载客户端连接数据库（或者选择你喜欢的MongoDB客户端），点击右上角`Try Free`，再点击Tools，选择`Compass`，然后选择`community Edition Stable`（社区稳定版，免费的）
 
-![mongod_client](https://github.com/zkk-pro/all-round-node/blob/master/assets/mongod_client.png?raw=true)
+![mongodb_client](https://github.com/zkk-pro/all-round-node/blob/master/assets/mongodb_client.png?raw=true)
 
 MongoDB Compass 是连接到数据库的工具，可以通过可视化的方式查看数据库、编辑数据。
 
