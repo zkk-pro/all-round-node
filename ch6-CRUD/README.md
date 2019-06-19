@@ -112,5 +112,278 @@ const video = new Video({
 
 ### 保存一个文档
 
+上面我们创建了一个映射videos文档的对象（video），现在我们就把这个对象数据保存到数据库里，映射videos文档的对象（video）有一个save方法，表示保存到数据里，这是一个异步操作，保存到数据库要花点时间，save方法返回一个Promise，异步保存后的结果是数据库保存的video对象，一旦我们将video对象保存到MongoDB中，MongoDB会给这个对象或文档一个唯一的标识：
 
+```javascript
+async function createVideo() {
+  // 这个对象可以映射为一个MongoDB的中videos文档
+  const video = new Video({
+    name: 'movie 1',
+    author: 'star',
+    tags: ['action', 'lovely'],
+    isPublished: true
+  })
 
+  // 保存数据到数据库
+  const result = await video.save()
+  console.log(result)
+}
+
+createVideo()
+```
+
+这就是MongoDB的美妙之处，不像关系型数据库，我们不需要创建表格、设计表格，我们只需要创建文档，然后存进去就行了， 
+
+### 查询文档
+
+现在让我们看看如何查询MongoDB中的文档，model创建的类有很多查询方法，我们先讲解`find`方法，该方法可以得到一个文档的列表，未查询到返回空数组`[]`，find方法接受一个对象作为参数，表示过滤条件，这个对象可以加入一个或多个键值对用来过滤，还可以进行排序，设置返回文档的数量，也可以选择特定属性的文档，find方法返回一个DocumentQuery对象，所以可以链式调用排序、限制数量...等方法，看代码：
+
+```javascript
+const Video = mongoose.model('video', videoSchema)
+
+async function getVideos() {
+  // 返回所有文档
+  // const videos = await Video.find()
+
+  // 添加过滤条件
+  const videos = await Video
+    .find({ author: 'star', isPublished: true})
+    .limit(10) // 限制最大10条数据
+    // 传入一个对象，使用指定的键值对来排序
+    // 1 表示升序，-1表示降序
+    // .sort({ name: 1 })
+      // 另一种用法 name 表示升序 -name表示降序
+    .sort('-name')
+     // 表示返回指定的属性，1 表示需要返回的属性
+    .select({ name: 1, tags: 1})
+  console.log(videos)
+}
+getVideos()
+```
+
+**比较查询操作符**
+
+上面我们简单的使用了find方法来筛选文档，接下来我将学习更复杂的查询，在MongoDB有很多的操作符用来做值的比较，MongoDB的操作符在mongoose中同样有效，下面来看看MongoDB中的操作符：
+
+- eq: equal 缩写，表示`等于`
+- ne: not equal 缩写，表示`不等于`
+- gt: greater than 缩写，表示`大于`
+- gte: greater than or equal to 缩写，表示`大于等于`
+- lt: less than 缩写，表示`小于`
+- lte: less than or equal to 缩写，表示`小于等于`
+- in: 包含
+- nin: not in 缩写，表示`不包含`
+
+例子：
+
+```javascript
+// 获取电影时长大于60分钟的
+// 如果是下面这个写法，我们只能获取时长是60分的，无法获取时长大于60分的
+// Video.find({ time: 60 })
+
+// so，正确的写法是：
+Video.find({ time: {$gt: 60 } })
+
+// 获取时长大于60，小于90分钟的电影
+Video.find({ time: {$gt: 60, $lt: 90 } })
+
+// 获取30分钟、60分钟、90分钟的电影
+Video.find({ time: {$in: [30, 60, 90] } })
+```
+
+**逻辑查询操作符**
+
+- or: 或者
+- and: 并且
+
+```javascript
+// 这条语句表示作者为 star 并且已经发布的电影
+// 如果想要查询 作者为 star 或 已经发布的电影呢
+Video.find({ author: 'star', isPublished: true})
+
+// 查询 作者为 star 或 已经发布的电影
+Video.find().or([ { author: 'star' }, { isPublished: true} ])
+
+// and 的使用方式和or基本相同，查询结果和第一条find方法一样
+// 但有些复杂的查询使用and方法更好用
+Video.find().and([ { author: 'star' }, { isPublished: true} ])
+```
+
+**使用正则表达式过滤数据**
+
+find方法里的过滤条件匹配的固定的字符串，例如：author: 'star'条件，那么author为star1的是不会返回的，如果想对字符串有更多的控制，这时就需要使用正则表达式了，来看看如何使用：
+
+```javascript
+// 匹配author以star开头的数据，后面是什么无所谓
+Video.find({ author: /^star/ })
+
+// 匹配author以star结尾的数据，并且忽略大小写
+Video.find({ author: /star$/i })
+
+// 匹配author包含star的数据，star可以在前面、中间、后面
+Video.find({ author: /.*star.*/ }) // .*表示0个或多个字符
+
+// 还可以使用更复杂的正则表达式，具体的可以去学习正则表达式的使用
+```
+
+**计数**
+
+获取符合过滤条件的文档数量
+
+```javascript
+Video.find({ author: 'star', isPublished: true}).count()
+```
+
+**分页**
+
+之前我们使用`limit`方法，与该方法如影随形的是`skip`方法，我们用它来实现分页功能，来看看如何做：
+
+```javascript
+async function pagination() {
+  // 定义两个变量，通常这个是从前端传递过来的
+  let pageNumber = 2 // 第几页
+  let pageSize = 10 // 每页多少条数据
+
+  const videos = await Video
+    .find({ author: /.*star.*/, isPublished: true })
+    // 为了实现分页，我们需要跳过前面的所有文档数据
+    // 公式：页数 - 1 * 一页的数据
+    .skip((pageNumber - 1) * pageSize)
+    .limit(pageSize) // 限制每页的数据
+    .sort({ name: 1 })
+    .select({ name: 1, tags: 1})
+
+  console.log(videos)
+}
+pagination()
+```
+
+## 把 json 数据导入数据库
+
+命令为：
+
+```javascript
+mongoimport --db mongo-exercises --collection courses --file --jsonArray
+
+```
+
+- mongoimport: MongoDB的导入命令
+- --db: 用来指明数据库名
+- --collection: 用来指明文档名称
+- --file: 导入的那个文件
+- --jsonArray: 如果文件数据是json数组，就需要添加这个参数
+
+### 更新文档
+
+前面我们已经学习了很多查询相关的方法了，现在来看看如何更新数据库文档。在MongoDB中有两种更新文档的方式：第一种是先查询，然后编辑，最后保存；另一种方式是先更新，直接接入数据库修改文档，同时可以可选的获取已经更新的文档，先看看第一种方式：
+
+```javascript
+async function updateCourse(id) {
+  // 1. 通过id找到数据
+  const course = await Course.findById(id)
+  if (!course) return // 判断
+
+  // 2. 修改数据
+  // course.isPublished = true
+  // course.author = 'yaya'
+  // 另一种修改方式
+  course.set({ isPublished: true, author: 'yaya'})
+
+  // 3. 保存数据
+  const result = await course.save()
+  console.log(result)
+}
+
+updateCourse('5a68fdf95db93f6477053ddd')
+```
+
+上面第一种方式当你接收到客户端的数据并且向验证数据的时候很有用，例如：如果isPublished为true，表示已经发布，已经发布的电影不能修改作者（author）字段，那么这方式，就需要先查询到数据，然后在判断后，才能进行下一步的操作。但是有时候，如果不需要验证客户端发过来的数据，那么可以使用第二种方式：
+
+```javascript
+async function updateCourse2(id) {
+  const result = await Course.update({_id: id}, {
+    $set: {
+      author: 'Hey',
+      isPublished: false
+    }
+  })
+  console.log(result)
+  // { n: 1, nModified: 1, ok: 1 }
+}
+
+updateCourse2('5a68fdf95db93f6477053ddd')
+```
+update方法第一个参数作为过滤，传入唯一的条件，更新一个数据，传入匹配多条数据的，更新多个数据，第二个参数为更新的数据，这里需要使用一个或多个更新运算符更新运算符可以在MongoDB的官方文档里：`Reference->Operators->Update Operators`里查看返回的结果是实现更新操作的结果，而不是文档。
+
+运算符：
+- $currentDate: 将字段的值设置为当前日期，可以是Date或Timestamp
+- $inc: 以特定的值递增，传递负值表示递减
+- $min: 给定的值小于现有字段值时才更新字段
+- $max: 和$min相反，给定的值大于现有字段值时才更新
+- $mul: 将字段的值乘以指定的数量
+- $rename: 重命名字段
+- $set: 设置文档中字段的值
+- $setOnInsert: 如果更新导致文档插入，则设置字段的值。 对修改现有文档的更新操作没有影响
+- $unset: 从文档中删除指定的字段
+
+有时候，我们想要得到已经被修改好的文档，可以使用`findByIdAndUpdate`方法：
+
+```javascript
+async function updateCourse3(id) {
+  // 第一个参数是id，第二个参数需要更新的数据
+  const course = await Course.findByIdAndUpdate(id, {
+    $set: {
+      author: 'Hey',
+      isPublished: false
+    }
+  }, { new: true })
+  console.log(course)
+}
+
+updateCourse3('5a68fdf95db93f6477053ddd')
+```
+
+使用`findByIdAndUpdate`得到的就是查询的对象（文档更新之前的），如果需要得到更新之后的文档，添加第三个参数`{ new: true }`。
+
+### 删除文档
+
+最后，我们来看看如何删除数据库的文档，使用`deleteOne`方法，这个方法接受一个过滤器对象，并且如果有多条符合过滤条件的文档，也只删除找到的第一条文档，返回删除的操作结果
+
+```javascript
+async function removeCourse(id) {
+  const result = await Course.deleteOne({ _id: id })
+  console.log(result)
+  // { n: 1, ok: 1, deletedCount: 1 }
+}
+
+removeCourse('5a68fdc3615eda645bc6bdec')
+```
+
+如果想一次删除多个文档，可以用`deleteMany`方法，该方法也是返回操作的结果：
+
+```javascript
+async function removeCourse(author) {
+  const result = await Course.deleteOne({ author: author })
+  console.log(result)
+}
+removeCourse('Hey')
+```
+
+如果想得到被删除的文档，可以使用`findByIdAndRemove`方法，如果给定的id不存在，将返回null：
+
+```javascript
+// 得到被删除的文档
+async function removeCourse(id) {
+  const course = await Course.findByIdAndRemove(id)
+  console.log(course)
+}
+removeCourse('5a68fdc3615eda645bc6bdec')
+```
+
+### 总结
+
+本篇文档讲解了MongoDB数据库的安装、使用mongoose连接MongoDB数据库和对MongoDB数据库的`增查改删`（CRUD）操作，熟练掌握这些操作是很有必要的，Okey~Thank for your reading!
+
+### 欢迎关注我的公众号
+
+![wx_qrcode](https://github.com/zkk-pro/all-round-node/blob/master/assets/wx_qrcode.jpg?raw=true)
