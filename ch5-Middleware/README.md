@@ -319,8 +319,24 @@ router.get('/api/videos', (req, res) => {
 module.exports = router
 ```
 
+然后在index.js入口文件中引入路由，再使用`app.use()`：
+
+```javascript
+const express = require('express')
+const videos = require('./routes/videos')
+
+const app = express()
+const PORT = process.env.PORT || 3000
+
+app.use('/', videos)
+
+app.listen(PORT, () => console.log(`app running port at ${PORT}`))
+```
+
+之后再添加别的业务路由时，也是用同样的方式，使用这种结构使得路由结构清晰，易于以后的维护。
+
 ### 总结
-本篇讲解了 Express 中间件、应用环境、应用配置、调试、以及结构化路由，这些都是在实际开发中会用到的知识，本篇知识粗略的讲解如何在应用中使用，更深入的知识还是的自己去查看官方文档探索，Thank for your reading!
+本篇讲解了 Express 中间件、应用环境、应用配置、调试、模板以及结构化路由，这些都是在实际开发中会用到的知识，本篇知识粗略的讲解如何在应用中使用，更深入的知识还是的自己去查看官方文档探索，Thank for your reading!
 
 ### 欢迎关注我的公众号
 
