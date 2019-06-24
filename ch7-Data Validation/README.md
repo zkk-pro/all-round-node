@@ -93,3 +93,105 @@ const courseSchema = new mongoose.Schema({
 以上就是mongoose常用的验证器，熟练使用这些验证器可以让我们的数据更加方便安全的写入数据库。
 
 ## 自定义验证器
+
+有时候内建的验证器并不能满足我们的要求，例如值是字符串数组：`tags: [String]`，并不能使用`required`，因为传入一个空数组时，mongoose也会认为是合法的，所以就需要自定义验证器，具操作如下：
+
+```javascript
+const courseSchema = new mongoose.Schema({
+  tags: {
+    type: Array,
+    validate: {
+      validator: function(v) {
+        return v.length > 0
+      },
+      message: 'have at least one tag'
+    }
+  }
+})
+```
+
+自定义验证器`validate`对象里的`validator`是一个返回布尔值的函数，函数中的参数是当前传入的值，`message`是提示信息。当我们没有传递tags属性时，mongoose实际上会默认实例化为一个空数组：
+
+```javascript
+const course = new Course({
+    // tags: [], // 不传递，默认为[]空数组
+    // tags: null // 如果传递null，报下面的错
+    // tags: Cannot read property 'length' of null
+  })
+```
+
+如果传递null，则报：`tags: Cannot read property 'length' of null`，实际上这不是我们想要要的报错信息，所以上面的验证逻辑的修改一下：
+
+```javascript
+const courseSchema = new mongoose.Schema({
+  tags: {
+    type: Array,
+    validate: {
+      validator: function(v) {
+        return v && v.length > 0
+      },
+      message: 'have at least one tag'
+    }
+  }
+})
+```
+
+以上就是自定义验证器，当mongoose提供的验证器无法满足要求时，可以使用这种方式，自己编写验证逻辑。
+
+## 异步验证器
+
+上面我们学习了自定义验证器，但是有时候，验证逻辑可能需要读取别的数据或远端的HTTP服务，这样就产生了异步操作，这时就需要一个异步的验证器了，具体做法如下：
+
+```javascript
+  // 自定义异步验证器
+const courseSchema = new mongoose.Schema({
+  tags2: {
+    type: Array,
+    validate: {
+      validator: function(v, callback) {
+        return new Promise(function(resolve, reject) {
+          setTimeout(() => {
+            resolve(v && v.length > 0)
+          }, 3000)
+        })
+      },
+      message: 'have at least one tag'
+    }
+  }
+})
+```
+
+在以前的版本中，是异步验证器把`validate`对象的`isAsync`设置为`true`，然后`validator`的函数添加一个回调函数，当异步操作完成后，把异步操作的结果传递给回调函数，此方式已经不推荐了，而是采用返回`Promise`的方式，像上面的代码一样。
+
+## 验证错误
+
+到目前为止，我们只是打印出了错误的信息，现在我们来看看具体的Error对象细节：
+
+```javascript
+  try {
+    await course.save()
+  }
+  catch (ex) {
+    for (let field in ex.errors) {
+      console.log(ex.errors[field])
+    }
+  }
+```
+
+打印出：
+
+![error_object](https://github.com/zkk-pro/all-round-node/blob/master/assets/error_object.png?raw=true)
+
+Error对象里是每一个验证不通过的错误对象，每个对象里有：
+
+- ValidatorError: 验证错误的堆栈信息
+- message: 错误提示
+- name: 对应的字段名
+- properties: 该字段里的属性
+- kind: 和 properties.validator 一样
+- path: 和 properties.path 一样
+- value: 和 properties.value 一样
+
+通过Error对象，我们可以得到每一个验证不通过的错误对象，从而进一步的对每个错误对象进行单独的处理。
+
+## schema类型选项
