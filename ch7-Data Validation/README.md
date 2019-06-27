@@ -87,8 +87,8 @@ const courseSchema = new mongoose.Schema({
 ```
 
 - 数字类型和时间类型的值有额外的两个验证：
-  - max: 最大数字
-  - min: 最小数字
+  + max: 最大数字
+  + min: 最小数字
 
 以上就是mongoose常用的验证器，熟练使用这些验证器可以让我们的数据更加方便安全的写入数据库。
 
@@ -186,12 +186,59 @@ Error对象里是每一个验证不通过的错误对象，每个对象里有：
 
 - ValidatorError: 验证错误的堆栈信息
 - message: 错误提示
-- name: 对应的字段名
+- name: 该对象名称
 - properties: 该字段里的属性
-- kind: 和 properties.validator 一样
-- path: 和 properties.path 一样
-- value: 和 properties.value 一样
+- kind: 验证器，和 properties.validator 一样
+- path: 该字段的名字，和 properties.path 一样
+- value: 该字段的值，和 properties.value 一样
 
 通过Error对象，我们可以得到每一个验证不通过的错误对象，从而进一步的对每个错误对象进行单独的处理。
 
 ## schema类型选项
+
+在定义schema时，可以直接定义属性的类型，也可以使用对象，在使用对象时，有一些属性上面已经讲过了，如：`type`，`required`，`validate`，`enum`，本小结，我们再来看看其它介个很有用的schema对象属性。
+
+- 字符串类型属性：
+  + lowercase: 设置为true时，mongoose会自动将字符串转为小写
+  + uppercase: 设置为true时，mongoose会自动将字符串转为大写
+  + trim: 设置为true时，会删除字符串前后有空格
+
+```javascript
+const courseSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    lowercase: true,
+    // uppercase: true
+    trim: true
+  }
+})
+```
+
+- 数值类型属性：
+  + max: 最大数字
+  + min: 最小数字
+  + get: 获取值是调用，属性值是一个返回处理后的值的函数
+  + set: 写入值是调用，属性值是一个返回处理后的值的函数
+
+```javascript
+const courseSchema = new mongoose.Schema({
+  // 对price属性进行四舍五入
+  price: { 
+    type: Number,
+    required: function () { return this.isPublished },
+    get: v => Math.round(v),
+    // 写入的时候回去掉小数点
+    set: v => Math.round(v)
+  }
+})
+```
+
+工具属性对于特定类型的type会起特定的作用，所以每个类型的数据都有特定的工具属性。
+
+### 总结
+
+本章节讲解了在mongoose中如何进行数据验证，包括mongoose内建验证、自定义验证、异步验证。数据验证是必须的，是为了数据更加安全的写入数据库中，所以在定义schema时，想想每个属性都需要怎么样的验证。okey~thank for your reading!
+
+### 欢迎关注我的公众号
+
+![wx_qrcode](https://github.com/zkk-pro/all-round-node/blob/master/assets/wx_qrcode.jpg?raw=true)
