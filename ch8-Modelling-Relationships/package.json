@@ -1,0 +1,15 @@
+{
+  "name": "ch8-Modelling-Relationships",
+  "version": "1.0.0",
+  "description": "在实际的开发中，我们可能不是对单个文档进行操作，例如我们有一个`videos`文档数据，文档里有演员，演员不止一个，so，可能有一个`actors`文档，表示演员集合，文档中的每个演员都有名字、照片等属性，现在来看看如何关联两个文档之间的操作，基本上有2种操作方式",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^5.6.1"
+  }
+}
