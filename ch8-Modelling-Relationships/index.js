@@ -1,3 +1,5 @@
+// 引用方式
+
 const mongoose = require('mongoose')
 
 // 链接数据库
@@ -17,7 +19,7 @@ const Video = mongoose.model('video', new mongoose.Schema({
   // 指向Actor集合的id引用链接
   actor: {
     type: mongoose.Schema.Types.ObjectId, // 类型
-    ref: 'Actor' // 指明引用的目标集合
+    ref: 'actor' // 指明引用的目标集合
   }
 }))
 
@@ -43,7 +45,10 @@ async function createVideo(name, actor) {
 
 // 查询video集合
 async function listVideo() {
-  const videos = await Video.find()
+  const videos = await Video
+  .find()
+  .populate('actor', 'name -_id')
+  .select('name actor')
   console.log(videos)
 }
 
