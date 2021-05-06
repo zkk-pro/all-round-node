@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "underscore": "^1.9.1",
+    "underscore": "^1.12.1",
     "zkk-pro-lib": "^1.0.0"
   },
   "devDependencies": {
